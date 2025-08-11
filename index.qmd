@@ -1,0 +1,238 @@
+---
+title: "What's New in tidymodels?"
+author: "Max Kuhn"
+---
+
+
+```{r}
+#| label: format-pkgs
+#| results: hide
+
+pkg <- function(x, cran = TRUE) {
+  cl <- match.call()
+  x <- as.character(cl$x)
+  pkg_chr(x, cran = cran)
+}
+
+pkg_chr <- function(x, cran = TRUE) {
+  if (cran) {
+    res <- glue::glue('<span class="pkg"><a href="https://cran.r-project.org/package={x}">{x}</a></span>')
+  } else {
+    res <- glue::glue('<span class="pkg">{x}</span>')
+  }
+ res 
+}
+  
+
+pkg_list <- function(x) {
+  x <- unique(x)
+  n <- length(x)
+  x <- x[order(tolower(x))]
+  x <- purrr::map_chr(x, ~ pkg_chr(.x))
+
+  req <- cli::pluralize("You’ll need {n} package{?s} ({x}) for this chapter. 
+                         You can install {?it/them} via:")
+  req
+}
+```
+
+
+## Packages to install
+
+```{r}
+#| label: installs
+#| eval: false
+
+pkgs <- paste0(
+  "tidymodels/", 
+  c("tune", "workflows", "important", "filtro", "tailor")
+  )
+pak::pak(pkgs, ask = FALSE)
+```
+
+<br> 
+
+```{r}
+#| label: setup
+library(tidymodels)
+library(desirability2)
+library(filtro)
+library(mirai) # or library(future)
+library(tailor)
+library(important)
+
+tidymodels_prefer() 
+```
+
+
+## Some Example Data
+
+```{r}
+#| label: sim-data
+set.seed(1)
+sim_data <- sim_classification(num_samples = 1000, intercept = -12)
+
+sim_data %>% count(class)
+
+sim_split <- initial_split(sim_data, strata = class)
+sim_train <- training(sim_split)
+sim_rs <- vfold_cv(sim_train)
+```
+
+<br> 
+
+There are 15 numeric predictors with various linear and nonlinear effects. 
+
+## A Cost-Sensitive Neural Network
+
+```{r}
+#| label: mlp-cost
+
+mlp_wt_spec <-
+  mlp(hidden_units = tune(), penalty = tune(), learn_rate = tune(), 
+      epochs = 500, activation = tune()) |>
+  set_engine("brulee", stop_iter = 3, class_weights = tune()) |>
+  set_mode("classification")
+
+rec <- recipe(class ~ ., data = sim_train) |>
+  step_normalize(all_numeric_predictors())
+
+mlp_wt_wflow <- workflow(rec, mlp_wt_spec)
+
+mlp_wt_param <- 
+  mlp_wt_wflow %>% 
+  extract_parameter_set_dials() %>% 
+  update(
+    class_weights = class_weights(c(1, 50)),
+    penalty = penalty(c(-10, -1))
+    )
+```
+
+## Basic Grid Search
+
+```{r}
+#| label: mlp-wt-code
+#| eval: false
+
+cls_mtr <- 
+  metric_set(brier_class, roc_auc, kap, sensitivity, specificity, mn_log_loss)
+
+mlp_wt_res <- 
+  mlp_wt_wflow |>
+  tune_grid(
+    resamples = sim_rs,
+    grid = 25,
+    control = control_grid(save_pred = TRUE),
+    metrics = cls_mtr,
+    param_info = mlp_wt_param
+  )
+```
+
+## Parallel Processing Updates
+
+tidymodels has always used the `r pkg(foreach)` package to enable parallel processing. Sadly, we've decided to move to packages that are being actively developed. 
+
+<br> 
+
+The `r pkg(tune)` 2.0 disables `r pkg(foreach)` and enables the use of either the `r pkg(future)` or `r pkg(mirai)` packages: 
+
+:::: {.columns}
+
+::: {.column width="38%"}
+`r pkg(foreach)` (deprecated):
+
+```{r}
+#| label: foreach-code
+#| eval: false
+#| code-line-numbers: false
+
+library(doParallel)
+cl <- makePSOCKcluster(cores)
+registerDoParallel(cl)
+
+# your code
+
+stopCluster(cl)
+```
+:::
+
+::: {.column width="35%"}
+`r pkg(future)`:
+
+```{r}
+#| label: future-code
+#| eval: false
+#| code-line-numbers: false
+
+library(future)
+plan("multisession", cores)
+
+# your code
+```
+:::
+
+::: {.column width="27%"}
+`r pkg(mirai)`:
+
+```{r}
+#| label: mirai-code
+#| eval: false
+#| code-line-numbers: false
+
+library(mirai)
+daemons(cores)
+
+# your code
+```
+:::
+
+::::
+
+
+## Multiparameter Optimization
+
+```{r}
+#| label: selects
+
+select_best(mlp_wt_res, metric = "sensitivity")
+
+select_best(mlp_wt_res, metric = "specificity")
+
+select_best(mlp_wt_res, metric = "brier_class")
+```
+
+
+## Postprocessing
+
+
+## Tailor
+
+
+## Feature selection
+
+
+
+## Quantile Regression
+
+
+## Sparse Data
+
+
+## catboost
+
+
+
+## AI Tools
+
+
+## What's Next
+
+We'll still be working on adding quantile regression to `r pkg(tune)`, `r pkg(yardstick)`, and other packages. 
+
+<br> 
+
+I we have time, we might also include more causal inference tools. 
+
+<br>
+
+I suspect that, around the new year, we'll move into a ["Snow Leopard"](https://en.wikipedia.org/wiki/Mac_OS_X_Snow_Leopard) phase where we concentrate on cleaning up more after our latests releases, add additional documentation, and refactoring our extra testing suite (which really needs some love). 
