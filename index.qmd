@@ -90,11 +90,13 @@ sim_rs <- vfold_cv(sim_train)
 
 <br> 
 
-There are 15 numeric predictors with various linear and nonlinear effects. 
+There are 15 numeric predictors with [various linear and nonlinear effects](https://modeldata.tidymodels.org/reference/sim_classification.html#method-caret-). 
 
 ## A Cost-Sensitive Neural Network
 
 We'll demonstrate some new features using a neural network model. We'll tune a single parameter (just for illustration): 
+
+<br>
 
 ```{r}
 #| label: mlp-cost
@@ -104,7 +106,8 @@ mlp_wt_spec <-
   set_engine("brulee", stop_iter = 3, class_weights = tune()) |>
   set_mode("classification")
 
-rec <- recipe(class ~ ., data = sim_train) |>
+rec <-
+  recipe(class ~ ., data = sim_train) |>
   step_normalize(all_numeric_predictors())
 
 mlp_wt_wflow <- workflow(rec, mlp_wt_spec)
@@ -126,8 +129,7 @@ daemons(parallel::detectCores())
 #| label: mlp-wt
 #| cache: true
 
-cls_mtr <-
-  metric_set(brier_class, kap, sensitivity, specificity)
+cls_mtr <- metric_set(brier_class, kap, sensitivity, specificity)
 
 mlp_wt_res <-
   mlp_wt_wflow |>
@@ -138,6 +140,9 @@ mlp_wt_res <-
   )
 ```
 
+<br> 
+
+A total of 10 * 50 = 500 models are fit. 
 
 ## Brier Curve Results
 
@@ -272,7 +277,7 @@ show_best(mlp_wt_res, metric = "brier_class", n = 1) |> select(-n, -.config)
 multi_res <-
   show_best_desirability(
     mlp_wt_res,
-    minimize(brier_class),
+    minimize(brier_class, low = 0.00, high = 0.25),
     maximize(sensitivity),
     constrain(specificity, low = 0.8, high = 1.0),
     n = 1
@@ -292,8 +297,8 @@ multi_res |> select(starts_with(".d_"))
 more_sens <-
   show_best_desirability(
     mlp_wt_res,
-    minimize(brier_class),
-    maximize(sensitivity, scale = 2),
+    minimize(brier_class, low = 0.00, high = 0.25),
+    maximize(sensitivity, scale = 2.0),
     constrain(specificity, low = 0.8, high = 1.0),
     n = 1
   )
@@ -350,9 +355,8 @@ Like a recipe, you don't need to use it on its own. We can add it to a workflow 
 #| label: mlp-thrsh
 
 mlp_thr_spec <-
-  mlp(hidden_units = 50, penalty = 0.01, learn_rate = 0.1, epochs = 500) |>
-  set_engine("brulee", stop_iter = 3) |>
-  set_mode("classification")
+  mlp_wt_spec |>
+  set_engine("brulee", stop_iter = 3) # <- no class_weights
 
 prob_tlr <- tailor() |> adjust_probability_threshold(threshold = tune())
 
@@ -364,6 +368,8 @@ To handle the class imbalance, we'll try to balance sensitivity/specificity with
 ## Adjust Class Probability Threshold
 
 Since we want to increase sensitivity, we need to decrease the probability of calling a prediction as "an event." That means thresholds less than 1/2.
+
+<br>
 
 ```{r}
 #| label: mlp-thr-param
@@ -378,7 +384,9 @@ mlp_thr_res <-
   )
 ```
 
+<br> 
 
+A total of 10 models are fit. 
 
 ## Brier Curve Results
 
@@ -431,12 +439,12 @@ mlp_thr_res |>
 
 show_best_desirability(
   mlp_thr_res,
-  minimize(brier_class),
-  maximize(sensitivity, scale = 3),
+  # Brier score is unaffected by the threshold
+  maximize(sensitivity, scale = 2.0),
   constrain(specificity, low = 0.8, high = 1.0),
   n = 1
 ) |>
-  select(5, 7:10)
+  select(1, 3:6)
 ```
 
 ## Calibration
@@ -522,19 +530,32 @@ For example:
 library(important)
 
 recipes(outcome ~ ., data = data) |>
-  step_rank(method = "imp_rf", prop_terms = 1 / 10) # or `
-num_terms
+  step_rank(method = "imp_rf", prop_terms = 1 / 10) # or num_terms
 
 recipes(outcome ~ ., data = data) |>
   step_filter(cor_pearson >= 0.8 & imp_rf_oblique >= 2)
 
 recipes(outcome ~ ., data = data) |>
-  step_filter_desirability(
+  step_rank_desirability(
     maximize(imp_rf_oblique, low = 2, high = 100),
     constrain(cor_pearson, low = 0.5, high = 1.0),
     prop_terms = 1 / 10
   )
 ```
+
+## Importance Too
+
+The `r pkg(important)` package also has a function `importance_perm()` to compute random-forest type permutation importances. 
+
+<br> 
+
+Why another package to do this?
+
+- `importance_perm()` can efficiently parallel process all of the work. 
+- Any `r pkg(yardstick)` metrics can be used (and more than one).
+- We can compute feature importance at two levels:
+	- The original feature (e.g., day of the week), or
+	- Any derived predictors (e.g., dummy variables, PCA components, spline basis columns, etc).  
 
 
 # Quantile Regression  {background-color="#70B7E1FF"}
@@ -576,9 +597,11 @@ Emil Hvitfeldt has worked very hard to make sure that we can consume/use a spars
 
 - We use R's arcane ALTREP tools to enable sparse vectors and, by extension, data frames that are effectively sparse. 
 
-- This can severely cut down memory usage, especially in recipes. _This happens automatically_.
+- This can severely cut down memory usage, especially in recipes.
 
-- However, only a few models can take sparse data as inputs (xgboost, glmnet, lightgbm, and  ~~ranger~~)
+-  _This happens automatically_ but you can opt-out.
+
+- However, only a few models can take sparse data as inputs (xgboost, glmnet, lightgbm, and  ~~ranger~~).
 
 An example from Emil's recent presentation:
 
@@ -656,3 +679,15 @@ Some dangling features: parameter constraints, a new Gaussian Process model, and
 <br>
 
 I suspect that, around the new year, we'll move into a ["Snow Leopard"](https://en.wikipedia.org/wiki/Mac_OS_X_Snow_Leopard) phase where we concentrate on cleaning up/optimizing after releases, add additional documentation, and refactoring our extra testing suite (which really needs some love). 
+
+## Thanks
+
+Thanks for the invitation to speak today!
+
+<br> 
+
+The tidymodels team: **Hannah Frick, Emil Hvitfeldt, and Simon Couch**.
+
+<br> 
+
+Special thanks to the other folks who contributed so much to tidymodels: Davis Vaughan, Julia Silge, Edgar Ruiz, Alison Hill, Desirée De Leon, our previous interns, and the tidyverse team.
