@@ -605,7 +605,7 @@ We knew that we would be making something similar, and that is the job of this y
 
 There are two packages: `r pkg(filtro)` contains the underlying code for filtering the predictors, and the (unreleased) `r pkg(important)` package will contain the recipe steps. 
 
-## filtro scores
+## filtro Score Objects
 
 An example of a _score_ object:
 
@@ -615,15 +615,18 @@ An example of a _score_ object:
 score_imp_rf_oblique
 ```
 
-## filtro scores
+## Use `fit()` to estimate values
 
 ```{r}
-#| label: filtro-rf-ex
-#| eval: false
+#| label: filtro-ex
+#| cache: true
 
-rf_imp <-
-  score_imp_rf |>
-  fit(outcome ~ ., data = sim_train)
+aov_imp <-
+  score_aov_pval |>
+  filtro::fit(class ~ ., data = sim_train)
+
+# p-values in -log10 format:
+aov_imp@results
 ```
 
 ## Scoring Methods
@@ -653,9 +656,7 @@ Currently: `r scores`.
 
 ## Recipe Steps
 
-These have not been implemented yet, but there will be several to choose from. 
-
-For example: 
+These have not been implemented yet, but there will be several to choose from: 
 
 ```{r}
 #| label: filter-step-univariate
@@ -663,10 +664,11 @@ For example:
 library(important)
 
 recipes(outcome ~ ., data = data) |>
-  step_rank(method = "imp_rf", prop_terms = 1 / 10) # or num_terms
+  step_rank_prop(method = "imp_rf", prop_terms = 1 / 10)
+# or step_rank_num()
 
 recipes(outcome ~ ., data = data) |>
-  step_rank_desirability(
+  step_rank_desirability_prop(
     maximize(imp_rf_oblique, low = 2, high = 100),
     constrain(cor_pearson, low = 0.5, high = 1.0),
     prop_terms = 1 / 10
@@ -819,7 +821,7 @@ Thanks for the invitation to speak today!
 
 <br> 
 
-The tidymodels team: **Hannah Frick, Emil Hvitfeldt, and Simon Couch**.
+The tidymodels team: **Hannah Frick, Emil Hvitfeldt, Simon Couch** and our 2025 intern **Frances Lin**.
 
 <br> 
 

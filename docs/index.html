@@ -623,8 +623,8 @@ Max Kuhn
 <p><br></p>
 <p>There are two packages: <span class="pkg"><a href="https://cran.r-project.org/package=filtro">filtro</a></span> contains the underlying code for filtering the predictors, and the (unreleased) <span class="pkg"><a href="https://cran.r-project.org/package=important">important</a></span> package will contain the recipe steps.</p>
 </section>
-<section id="filtro-scores" class="slide level2">
-<h2>filtro scores</h2>
+<section id="filtro-score-objects" class="slide level2">
+<h2>filtro Score Objects</h2>
 <p>An example of a <em>score</em> object:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href=""></a>score_imp_rf_oblique</span>
@@ -647,12 +647,33 @@ Max Kuhn
 <span id="cb22-18"><a href=""></a><span class="co">#&gt;  @ engine        : chr "aorsf"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="filtro-scores-1" class="slide level2">
-<h2>filtro scores</h2>
+<section id="use-fit-to-estimate-values" class="slide level2">
+<h2>Use <code>fit()</code> to estimate values</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href=""></a>rf_imp <span class="ot">&lt;-</span></span>
-<span id="cb23-2"><a href=""></a>  score_imp_rf <span class="sc">|&gt;</span></span>
-<span id="cb23-3"><a href=""></a>  <span class="fu">fit</span>(outcome <span class="sc">~</span> ., <span class="at">data =</span> sim_train)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href=""></a>aov_imp <span class="ot">&lt;-</span></span>
+<span id="cb23-2"><a href=""></a>  score_aov_pval <span class="sc">|&gt;</span></span>
+<span id="cb23-3"><a href=""></a>  filtro<span class="sc">::</span><span class="fu">fit</span>(class <span class="sc">~</span> ., <span class="at">data =</span> sim_train)</span>
+<span id="cb23-4"><a href=""></a></span>
+<span id="cb23-5"><a href=""></a><span class="co"># p-values in -log10 format:</span></span>
+<span id="cb23-6"><a href=""></a>aov_imp<span class="sc">@</span>results</span>
+<span id="cb23-7"><a href=""></a><span class="co">#&gt; # A tibble: 15 × 4</span></span>
+<span id="cb23-8"><a href=""></a><span class="co">#&gt;    name      score outcome predictor   </span></span>
+<span id="cb23-9"><a href=""></a><span class="co">#&gt;    &lt;chr&gt;     &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;       </span></span>
+<span id="cb23-10"><a href=""></a><span class="co">#&gt;  1 aov_pval 4.94   class   two_factor_1</span></span>
+<span id="cb23-11"><a href=""></a><span class="co">#&gt;  2 aov_pval 1.82   class   two_factor_2</span></span>
+<span id="cb23-12"><a href=""></a><span class="co">#&gt;  3 aov_pval 0.161  class   non_linear_1</span></span>
+<span id="cb23-13"><a href=""></a><span class="co">#&gt;  4 aov_pval 0.489  class   non_linear_2</span></span>
+<span id="cb23-14"><a href=""></a><span class="co">#&gt;  5 aov_pval 0.204  class   non_linear_3</span></span>
+<span id="cb23-15"><a href=""></a><span class="co">#&gt;  6 aov_pval 0.0168 class   linear_01   </span></span>
+<span id="cb23-16"><a href=""></a><span class="co">#&gt;  7 aov_pval 0.351  class   linear_02   </span></span>
+<span id="cb23-17"><a href=""></a><span class="co">#&gt;  8 aov_pval 0.0883 class   linear_03   </span></span>
+<span id="cb23-18"><a href=""></a><span class="co">#&gt;  9 aov_pval 0.594  class   linear_04   </span></span>
+<span id="cb23-19"><a href=""></a><span class="co">#&gt; 10 aov_pval 0.143  class   linear_05   </span></span>
+<span id="cb23-20"><a href=""></a><span class="co">#&gt; 11 aov_pval 1.12   class   linear_06   </span></span>
+<span id="cb23-21"><a href=""></a><span class="co">#&gt; 12 aov_pval 0.154  class   linear_07   </span></span>
+<span id="cb23-22"><a href=""></a><span class="co">#&gt; 13 aov_pval 0.115  class   linear_08   </span></span>
+<span id="cb23-23"><a href=""></a><span class="co">#&gt; 14 aov_pval 0.808  class   linear_09   </span></span>
+<span id="cb23-24"><a href=""></a><span class="co">#&gt; 15 aov_pval 0.0518 class   linear_10</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="scoring-methods" class="slide level2">
@@ -663,23 +684,23 @@ Max Kuhn
 </section>
 <section id="recipe-steps" class="slide level2">
 <h2>Recipe Steps</h2>
-<p>These have not been implemented yet, but there will be several to choose from.</p>
-<p>For example:</p>
+<p>These have not been implemented yet, but there will be several to choose from:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href=""></a><span class="fu">library</span>(important)</span>
 <span id="cb24-2"><a href=""></a></span>
 <span id="cb24-3"><a href=""></a><span class="fu">recipes</span>(outcome <span class="sc">~</span> ., <span class="at">data =</span> data) <span class="sc">|&gt;</span></span>
-<span id="cb24-4"><a href=""></a>  <span class="fu">step_rank</span>(<span class="at">method =</span> <span class="st">"imp_rf"</span>, <span class="at">prop_terms =</span> <span class="dv">1</span> <span class="sc">/</span> <span class="dv">10</span>) <span class="co"># or num_terms</span></span>
-<span id="cb24-5"><a href=""></a></span>
-<span id="cb24-6"><a href=""></a><span class="fu">recipes</span>(outcome <span class="sc">~</span> ., <span class="at">data =</span> data) <span class="sc">|&gt;</span></span>
-<span id="cb24-7"><a href=""></a>  <span class="fu">step_rank_desirability</span>(</span>
-<span id="cb24-8"><a href=""></a>    <span class="fu">maximize</span>(imp_rf_oblique, <span class="at">low =</span> <span class="dv">2</span>, <span class="at">high =</span> <span class="dv">100</span>),</span>
-<span id="cb24-9"><a href=""></a>    <span class="fu">constrain</span>(cor_pearson, <span class="at">low =</span> <span class="fl">0.5</span>, <span class="at">high =</span> <span class="fl">1.0</span>),</span>
-<span id="cb24-10"><a href=""></a>    <span class="at">prop_terms =</span> <span class="dv">1</span> <span class="sc">/</span> <span class="dv">10</span></span>
-<span id="cb24-11"><a href=""></a>  )</span>
-<span id="cb24-12"><a href=""></a></span>
-<span id="cb24-13"><a href=""></a><span class="fu">recipes</span>(outcome <span class="sc">~</span> ., <span class="at">data =</span> data) <span class="sc">|&gt;</span></span>
-<span id="cb24-14"><a href=""></a>  <span class="fu">step_filter</span>(cor_pearson <span class="sc">&gt;=</span> <span class="fl">0.75</span> <span class="sc">&amp;</span> imp_rf_oblique <span class="sc">&gt;=</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb24-4"><a href=""></a>  <span class="fu">step_rank_prop</span>(<span class="at">method =</span> <span class="st">"imp_rf"</span>, <span class="at">prop_terms =</span> <span class="dv">1</span> <span class="sc">/</span> <span class="dv">10</span>)</span>
+<span id="cb24-5"><a href=""></a><span class="co"># or step_rank_num()</span></span>
+<span id="cb24-6"><a href=""></a></span>
+<span id="cb24-7"><a href=""></a><span class="fu">recipes</span>(outcome <span class="sc">~</span> ., <span class="at">data =</span> data) <span class="sc">|&gt;</span></span>
+<span id="cb24-8"><a href=""></a>  <span class="fu">step_rank_desirability_prop</span>(</span>
+<span id="cb24-9"><a href=""></a>    <span class="fu">maximize</span>(imp_rf_oblique, <span class="at">low =</span> <span class="dv">2</span>, <span class="at">high =</span> <span class="dv">100</span>),</span>
+<span id="cb24-10"><a href=""></a>    <span class="fu">constrain</span>(cor_pearson, <span class="at">low =</span> <span class="fl">0.5</span>, <span class="at">high =</span> <span class="fl">1.0</span>),</span>
+<span id="cb24-11"><a href=""></a>    <span class="at">prop_terms =</span> <span class="dv">1</span> <span class="sc">/</span> <span class="dv">10</span></span>
+<span id="cb24-12"><a href=""></a>  )</span>
+<span id="cb24-13"><a href=""></a></span>
+<span id="cb24-14"><a href=""></a><span class="fu">recipes</span>(outcome <span class="sc">~</span> ., <span class="at">data =</span> data) <span class="sc">|&gt;</span></span>
+<span id="cb24-15"><a href=""></a>  <span class="fu">step_filter</span>(cor_pearson <span class="sc">&gt;=</span> <span class="fl">0.75</span> <span class="sc">&amp;</span> imp_rf_oblique <span class="sc">&gt;=</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="importance-too" class="slide level2">
@@ -833,7 +854,7 @@ Max Kuhn
 <h2>Thanks</h2>
 <p>Thanks for the invitation to speak today!</p>
 <p><br></p>
-<p>The tidymodels team: <strong>Hannah Frick, Emil Hvitfeldt, and Simon Couch</strong>.</p>
+<p>The tidymodels team: <strong>Hannah Frick, Emil Hvitfeldt, Simon Couch</strong> and our 2025 intern <strong>Frances Lin</strong>.</p>
 <p><br></p>
 <p>Special thanks to the other folks who contributed so much to tidymodels: Davis Vaughan, Julia Silge, Edgar Ruiz, Alison Hill, Desirée De Leon, our previous interns, and the tidyverse team.</p>
 
