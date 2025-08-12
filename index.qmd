@@ -46,21 +46,32 @@ pkg_list <- function(x) {
 ```
 
 
+## The tidymodels Team
+
+<!-- who are we? -->
+
+::: columns
+::: {.column width="25%"}
+:::
+
+::: columns
+::: {.column width="25%"}
+![](images/avatars/max.png) ![](images/avatars/emil.png)
+:::
+
+::: {.column width="25%"}
+![](images/avatars/hannah.png) ![](images/avatars/simon.png)
+:::
+:::
+
+::: {.column width="25%"}
+:::
+:::
+
 ## Packages Used in This Talk
-
-Devel versions: 
+ 
 ```{r}
-#| label: installs
-#| eval: false
-# fmt: skip
-paste0("tidymodels/", c("tune", "workflows", "important", "filtro", "tailor")) |> 
-  pak::pak()
-```
-
-
-These are used: 
-```{r}
-#| label: setup
+#| label: pkgs
 library(tidymodels)
 library(desirability2)
 library(filtro)
@@ -72,6 +83,23 @@ library(important)
 tidymodels_prefer()
 theme_set(theme_bw())
 ```
+
+## Packages Used in This Talk
+
+
+```{r}
+#| label: dev-installs
+#| eval: false
+paste0(
+  "tidymodels/",
+  c("tune", "workflows", "important", "filtro", "tailor")
+) |>
+  pak::pak()
+```
+
+<br>
+
+`r pkg(tune)` and `r pkg(workflows)` are still in flux.
 
 
 ## Some Example Data
@@ -85,7 +113,7 @@ sim_data %>% count(class)
 
 sim_split <- initial_split(sim_data, strata = class)
 sim_train <- training(sim_split)
-sim_rs <- vfold_cv(sim_train)
+sim_rs <- vfold_cv(sim_train, v = 10)
 ```
 
 <br> 
@@ -115,8 +143,6 @@ mlp_wt_wflow <- workflow(rec, mlp_wt_spec)
 
 ## Basic Grid Search
 
-note about space-filling designs
-
 ```{r}
 #| label: mirai
 #| results: hide
@@ -143,6 +169,10 @@ mlp_wt_res <-
 <br> 
 
 A total of 10 * 50 = 500 models are fit. 
+
+<br> 
+
+A few versions ago, `r pkg(tune)` defaults to using non-random, optimized space-filling designs. 
 
 ## Brier Curve Results
 
@@ -259,15 +289,115 @@ daemons(cores)
 
 ## Differing Goals
 
+::: {.panel-tabset}
+
+### Sensitivity
+
 ```{r}
-#| label: selects
-
+#| label: selects-sens-wts
 show_best(mlp_wt_res, metric = "sensitivity", n = 1) |> select(-n, -.config)
+```
 
+### Specificity
+
+```{r}
+#| label: selects-spec-wts
 show_best(mlp_wt_res, metric = "specificity", n = 1) |> select(-n, -.config)
+```
 
+
+### Brier Score
+
+```{r}
+#| label: selects-brier-wts
 show_best(mlp_wt_res, metric = "brier_class", n = 1) |> select(-n, -.config)
 ```
+
+:::
+
+<br>
+
+How can we jointly optimize different performance metrics? 
+
+One option is _desirability functions_. These are tools that convert the range of performance metrics to [0,1] where 1.0 is most desirable. 
+
+## Desirability Functions
+
+::: {.panel-tabset}
+
+### Maximize
+
+```{r}
+#| label: d-max
+#| echo: false
+#| out-width: 50%
+#| fig-width: 6
+#| fig-height: 3.5
+#| fig-align: center
+
+tibble(sensitivity = seq(-0.05, 1.05, length.out = 500)) |>
+  mutate(desirability = d_max(sensitivity, low = .5, high = 1)) |>
+  ggplot(aes(sensitivity, desirability)) +
+  geom_line() +
+  labs(x = "Sensitivity")
+```
+
+### Minimize
+
+```{r}
+#| label: d-min
+#| echo: false
+#| out-width: 50%
+#| fig-width: 6.1
+#| fig-height: 3.5
+#| fig-align: center
+
+tibble(Brier = seq(-0.001, 0.3, length.out = 500)) |>
+  mutate(
+    desirability = d_min(Brier, low = 0, high = 0.25),
+    scale = "1"
+  ) |>
+  bind_rows(
+    tibble(Brier = seq(-0.001, 0.3, length.out = 500)) |>
+      mutate(
+        desirability = d_min(Brier, low = 0, high = 0.25, scale = 2),
+        scale = "2"
+      )
+  ) |>
+  bind_rows(
+    tibble(Brier = seq(-0.001, 0.3, length.out = 500)) |>
+      mutate(
+        desirability = d_min(Brier, low = 0, high = 0.25, scale = 1 / 2),
+        scale = "1/2"
+      )
+  ) |>
+  ggplot(aes(Brier, desirability, col = scale, lty = scale)) +
+  geom_line() +
+  labs(x = "Brier Score")
+```
+
+
+### Constrain to a Range
+
+
+```{r}
+#| label: d-range
+#| echo: false
+#| out-width: 50%
+#| fig-width: 6
+#| fig-height: 3.5
+#| fig-align: center
+
+tibble(specificity = seq(-0.05, 1.05, length.out = 500)) |>
+  mutate(desirability = d_box(specificity, low = .75, high = 1)) |>
+  ggplot(aes(specificity, desirability)) +
+  geom_line() +
+  labs(x = "Specificity")
+```
+
+:::
+
+The `r pkg(desirability2)` package has inline functions for these. 
 
 ## Multiparameter Optimization 
 
@@ -279,7 +409,7 @@ multi_res <-
     mlp_wt_res,
     minimize(brier_class, low = 0.00, high = 0.25),
     maximize(sensitivity),
-    constrain(specificity, low = 0.8, high = 1.0),
+    constrain(specificity, low = 0.75, high = 1.0),
     n = 1
   )
 
@@ -299,7 +429,7 @@ more_sens <-
     mlp_wt_res,
     minimize(brier_class, low = 0.00, high = 0.25),
     maximize(sensitivity, scale = 2.0),
-    constrain(specificity, low = 0.8, high = 1.0),
+    constrain(specificity, low = 0.75, high = 1.0),
     n = 1
   )
 
@@ -441,7 +571,7 @@ show_best_desirability(
   mlp_thr_res,
   # Brier score is unaffected by the threshold
   maximize(sensitivity, scale = 2.0),
-  constrain(specificity, low = 0.8, high = 1.0),
+  constrain(specificity, low = 0.75, high = 1.0),
   n = 1
 ) |>
   select(1, 3:6)
@@ -533,14 +663,14 @@ recipes(outcome ~ ., data = data) |>
   step_rank(method = "imp_rf", prop_terms = 1 / 10) # or num_terms
 
 recipes(outcome ~ ., data = data) |>
-  step_filter(cor_pearson >= 0.8 & imp_rf_oblique >= 2)
-
-recipes(outcome ~ ., data = data) |>
   step_rank_desirability(
     maximize(imp_rf_oblique, low = 2, high = 100),
     constrain(cor_pearson, low = 0.5, high = 1.0),
     prop_terms = 1 / 10
   )
+
+recipes(outcome ~ ., data = data) |>
+  step_filter(cor_pearson >= 0.75 & imp_rf_oblique >= 2)
 ```
 
 ## Importance Too
@@ -549,7 +679,7 @@ The `r pkg(important)` package also has a function `importance_perm()` to comput
 
 <br> 
 
-Why another package to do this?
+Why make _another_ package to do this?
 
 - `importance_perm()` can efficiently parallel process all of the work. 
 - Any `r pkg(yardstick)` metrics can be used (and more than one).
@@ -659,7 +789,7 @@ I'm about 40% done with _Applied Machine Learning for Tabular Data_ [(website)](
 
 <br> 
 
-Hopefully, we can update _Tidy Models with R_ [(website)](https://tmwr.org/) or have a second edition.
+Hopefully, we can update the print version of _Tidy Models with R_ [(website)](https://tmwr.org/) or have a second edition.
 
 <br> 
 

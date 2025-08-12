@@ -41,3 +41,8 @@ $presentation-heading-color: $charcoal !default;
 .reveal .column-output-location .column:first-of-type div.sourceCode {
   height: unset !important;
 }
+
+span.pkg {  
+  font-family: monospace;
+  font-size: 90%;
+}
