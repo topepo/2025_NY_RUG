@@ -244,7 +244,7 @@ Max Kuhn
 <span id="cb2-5"><a href=""></a>  pak<span class="sc">::</span><span class="fu">pak</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><br></p>
-<p><span class="pkg"><a href="https://cran.r-project.org/package=tune">tune</a></span> and <span class="pkg"><a href="https://cran.r-project.org/package=workflows">workflows</a></span> are still in flux.</p>
+<p><span class="pkg"><a href="https://cran.r-project.org/package=tune">tune</a></span> and <span class="pkg"><a href="https://cran.r-project.org/package=workflows">workflows</a></span> are still in flux. If something is very interesting to you, be aware that they may change before the packages are on CRAN.</p>
 </section>
 <section id="some-example-data" class="slide level2">
 <h2>Some Example Data</h2>
@@ -299,7 +299,7 @@ Max Kuhn
 <p><br></p>
 <p>A total of 10 * 50 = 500 models are fit.</p>
 <p><br></p>
-<p>A few versions ago, <span class="pkg"><a href="https://cran.r-project.org/package=tune">tune</a></span> defaults to using non-random, optimized space-filling designs.</p>
+<p>Note: A few versions ago, <span class="pkg"><a href="https://cran.r-project.org/package=tune">tune</a></span> defaults to using non-random, optimized space-filling designs.</p>
 </section>
 <section id="brier-curve-results" class="slide level2">
 <h2>Brier Curve Results</h2>
@@ -317,6 +317,7 @@ Max Kuhn
 <img data-src="figures/wts-kappa-1.svg" class="quarto-figure quarto-figure-center r-stretch" style="width:100.0%"></section>
 <section id="sensitivityspecificity-results" class="slide level2">
 <h2>Sensitivity/Specificity Results</h2>
+<p><br></p>
 
 <img data-src="figures/wts-sens-spec-1.svg" class="quarto-figure quarto-figure-center r-stretch" style="width:80.0%"></section>
 <section id="new-things" class="title-slide slide level1 center" data-background-color="#D04E59FF">
@@ -405,7 +406,7 @@ Max Kuhn
 </div>
 <p><br></p>
 <p>How can we jointly optimize different performance metrics?</p>
-<p>One option is <em>desirability functions</em>. These are tools that convert the range of performance metrics to [0,1] where 1.0 is most desirable.</p>
+<p>One option is <em>desirability functions</em> (<a href="https://aml4td.org/chapters/cls-metrics.html#sec-cls-multi-objectives">AML4TD notes</a>). These are tools that convert the range of performance metrics to [0,1] where 1.0 is most desirable.</p>
 </section>
 <section id="desirability-functions" class="slide level2">
 <h2>Desirability Functions</h2>
@@ -502,7 +503,7 @@ Max Kuhn
 </div>
 </section></section>
 <section>
-<section id="postprocessing" class="title-slide slide level1 center" data-background-color="#BC8E7DFF">
+<section id="postprocessing" class="title-slide slide level1 center" data-background-color="#BDE9C9FF">
 <h1>Postprocessing</h1>
 
 </section>
@@ -580,6 +581,7 @@ Max Kuhn
 <img data-src="figures/thr-kappa-1.svg" class="quarto-figure quarto-figure-center r-stretch" style="width:100.0%"></section>
 <section id="sensitivityspecificity-results-1" class="slide level2">
 <h2>Sensitivity/Specificity Results</h2>
+<p><br></p>
 
 <img data-src="figures/thr-sens-spec-1.svg" class="quarto-figure quarto-figure-center r-stretch" style="width:80.0%"></section>
 <section id="more-desirability-functions" class="slide level2">
@@ -810,7 +812,7 @@ Max Kuhn
 <h2>Shameless Promotions</h2>
 <p>I’m about 40% done with <em>Applied Machine Learning for Tabular Data</em> <a href="https://aml4td.org/">(website)</a> <a href="https://tidymodels.aml4td.org/">(tidymodels companion)</a></p>
 <p><br></p>
-<p>Hopefully, we can update the print version of <em>Tidy Models with R</em> <a href="https://tmwr.org/">(website)</a> or have a second edition.</p>
+<p>Hopefully, we can update the print version of <em>Tidy Models with R</em> <a href="https://tmwr.org/">(website)</a> or make a second edition.</p>
 <p><br></p>
 <p>Emil is still working on his encyclopedia of feature engineering methods: <em>Feature Engineering A-Z</em> <a href="https://feaz-book.com/">(website)</a>.</p>
 </section></section>

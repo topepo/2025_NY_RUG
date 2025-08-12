@@ -99,7 +99,7 @@ paste0(
 
 <br>
 
-`r pkg(tune)` and `r pkg(workflows)` are still in flux.
+`r pkg(tune)` and `r pkg(workflows)` are still in flux. If something is very interesting to you, be aware that they may change before the packages are on CRAN. 
 
 
 ## Some Example Data
@@ -172,7 +172,7 @@ A total of 10 * 50 = 500 models are fit.
 
 <br> 
 
-A few versions ago, `r pkg(tune)` defaults to using non-random, optimized space-filling designs. 
+Note: A few versions ago, `r pkg(tune)` defaults to using non-random, optimized space-filling designs. 
 
 ## Brier Curve Results
 
@@ -199,6 +199,8 @@ autoplot(mlp_wt_res, metric = "kap")
 
 ## Sensitivity/Specificity Results
 
+<br>
+
 ```{r}
 #| label: wts-sens-spec
 #| echo: false
@@ -212,7 +214,6 @@ mlp_wt_res |>
   ggplot(aes(class_weights, mean, col = .metric, pch = .metric)) +
   geom_point(cex = 2, alpha = 1 / 2) +
   geom_smooth(se = FALSE) +
-  # lims(y = 0:1) +
   labs(x = "Minority Class Weight", y = "Statistic") +
   scale_color_brewer(palette = "Dark2")
 ```
@@ -319,7 +320,7 @@ show_best(mlp_wt_res, metric = "brier_class", n = 1) |> select(-n, -.config)
 
 How can we jointly optimize different performance metrics? 
 
-One option is _desirability functions_. These are tools that convert the range of performance metrics to [0,1] where 1.0 is most desirable. 
+One option is _desirability functions_ ([AML4TD notes](https://aml4td.org/chapters/cls-metrics.html#sec-cls-multi-objectives)). These are tools that convert the range of performance metrics to [0,1] where 1.0 is most desirable. 
 
 ## Desirability Functions
 
@@ -542,6 +543,8 @@ autoplot(mlp_thr_res, metric = "kap")
 ```
 
 ## Sensitivity/Specificity Results
+
+<br>
 
 ```{r}
 #| label: thr-sens-spec
@@ -789,7 +792,7 @@ I'm about 40% done with _Applied Machine Learning for Tabular Data_ [(website)](
 
 <br> 
 
-Hopefully, we can update the print version of _Tidy Models with R_ [(website)](https://tmwr.org/) or have a second edition.
+Hopefully, we can update the print version of _Tidy Models with R_ [(website)](https://tmwr.org/) or make a second edition.
 
 <br> 
 
