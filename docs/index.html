@@ -475,14 +475,14 @@ Max Kuhn
 <span id="cb14-21"><a href=""></a><span class="co">#&gt; 1              0.602                  1                  1      0.844</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="more-sensitivity" class="slide level2">
-<h2>More Sensitivity</h2>
+<section id="emphasize-brier-score" class="slide level2">
+<h2>Emphasize Brier Score</h2>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href=""></a>more_sens <span class="ot">&lt;-</span></span>
 <span id="cb15-2"><a href=""></a>  <span class="fu">show_best_desirability</span>(</span>
 <span id="cb15-3"><a href=""></a>    mlp_wt_res,</span>
-<span id="cb15-4"><a href=""></a>    <span class="fu">minimize</span>(brier_class, <span class="at">low =</span> <span class="fl">0.00</span>, <span class="at">high =</span> <span class="fl">0.25</span>),</span>
-<span id="cb15-5"><a href=""></a>    <span class="fu">maximize</span>(sensitivity, <span class="at">scale =</span> <span class="fl">2.0</span>),</span>
+<span id="cb15-4"><a href=""></a>    <span class="fu">minimize</span>(brier_class, <span class="at">low =</span> <span class="fl">0.00</span>, <span class="at">high =</span> <span class="fl">0.25</span>, <span class="at">scale =</span> <span class="fl">2.0</span>),</span>
+<span id="cb15-5"><a href=""></a>    <span class="fu">maximize</span>(sensitivity),</span>
 <span id="cb15-6"><a href=""></a>    <span class="fu">constrain</span>(specificity, <span class="at">low =</span> <span class="fl">0.75</span>, <span class="at">high =</span> <span class="fl">1.0</span>),</span>
 <span id="cb15-7"><a href=""></a>    <span class="at">n =</span> <span class="dv">1</span></span>
 <span id="cb15-8"><a href=""></a>  )</span>
@@ -491,14 +491,14 @@ Max Kuhn
 <span id="cb15-11"><a href=""></a><span class="co">#&gt; # A tibble: 1 × 5</span></span>
 <span id="cb15-12"><a href=""></a><span class="co">#&gt;   class_weights brier_class   kap sensitivity specificity</span></span>
 <span id="cb15-13"><a href=""></a><span class="co">#&gt;           &lt;int&gt;       &lt;dbl&gt; &lt;dbl&gt;       &lt;dbl&gt;       &lt;dbl&gt;</span></span>
-<span id="cb15-14"><a href=""></a><span class="co">#&gt; 1            45      0.0995 0.552       0.982       0.851</span></span>
+<span id="cb15-14"><a href=""></a><span class="co">#&gt; 1             7      0.0454 0.706       0.849       0.948</span></span>
 <span id="cb15-15"><a href=""></a></span>
 <span id="cb15-16"><a href=""></a></span>
 <span id="cb15-17"><a href=""></a>more_sens <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="fu">starts_with</span>(<span class="st">".d_"</span>))</span>
 <span id="cb15-18"><a href=""></a><span class="co">#&gt; # A tibble: 1 × 4</span></span>
 <span id="cb15-19"><a href=""></a><span class="co">#&gt;   .d_min_brier_class .d_max_sensitivity .d_box_specificity .d_overall</span></span>
 <span id="cb15-20"><a href=""></a><span class="co">#&gt;                &lt;dbl&gt;              &lt;dbl&gt;              &lt;dbl&gt;      &lt;dbl&gt;</span></span>
-<span id="cb15-21"><a href=""></a><span class="co">#&gt; 1              0.602                  1                  1      0.844</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb15-21"><a href=""></a><span class="co">#&gt; 1              0.669              0.634                  1      0.751</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section></section>
 <section>
@@ -582,13 +582,13 @@ Max Kuhn
 <h2>Sensitivity/Specificity Results</h2>
 
 <img data-src="figures/thr-sens-spec-1.svg" class="quarto-figure quarto-figure-center r-stretch" style="width:80.0%"></section>
-<section id="more-sensitivity-again" class="slide level2">
-<h2>More Sensitivity (Again)</h2>
+<section id="more-desirability-functions" class="slide level2">
+<h2>More Desirability Functions</h2>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href=""></a><span class="fu">show_best_desirability</span>(</span>
 <span id="cb21-2"><a href=""></a>  mlp_thr_res,</span>
 <span id="cb21-3"><a href=""></a>  <span class="co"># Brier score is unaffected by the threshold</span></span>
-<span id="cb21-4"><a href=""></a>  <span class="fu">maximize</span>(sensitivity, <span class="at">scale =</span> <span class="fl">2.0</span>),</span>
+<span id="cb21-4"><a href=""></a>  <span class="fu">maximize</span>(sensitivity),</span>
 <span id="cb21-5"><a href=""></a>  <span class="fu">constrain</span>(specificity, <span class="at">low =</span> <span class="fl">0.75</span>, <span class="at">high =</span> <span class="fl">1.0</span>),</span>
 <span id="cb21-6"><a href=""></a>  <span class="at">n =</span> <span class="dv">1</span></span>
 <span id="cb21-7"><a href=""></a>) <span class="sc">|&gt;</span></span>

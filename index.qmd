@@ -419,7 +419,7 @@ multi_res |> select(1, 3:6)
 multi_res |> select(starts_with(".d_"))
 ```
 
-## More Sensitivity
+## Emphasize Brier Score
 
 ```{r}
 #| label: more-sensitivity
@@ -427,8 +427,8 @@ multi_res |> select(starts_with(".d_"))
 more_sens <-
   show_best_desirability(
     mlp_wt_res,
-    minimize(brier_class, low = 0.00, high = 0.25),
-    maximize(sensitivity, scale = 2.0),
+    minimize(brier_class, low = 0.00, high = 0.25, scale = 2.0),
+    maximize(sensitivity),
     constrain(specificity, low = 0.75, high = 1.0),
     n = 1
   )
@@ -562,7 +562,7 @@ mlp_thr_res |>
 ```
 
 
-## More Sensitivity (Again)
+## More Desirability Functions
 
 ```{r}
 #| label: thr-more-sensitivity
@@ -570,7 +570,7 @@ mlp_thr_res |>
 show_best_desirability(
   mlp_thr_res,
   # Brier score is unaffected by the threshold
-  maximize(sensitivity, scale = 2.0),
+  maximize(sensitivity),
   constrain(specificity, low = 0.75, high = 1.0),
   n = 1
 ) |>
