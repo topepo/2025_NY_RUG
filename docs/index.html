@@ -511,7 +511,7 @@ Max Kuhn
 <h2>What is postprocessing?</h2>
 <p>Postprocessing means the adjustment of predictions create by a model, such as:</p>
 <ul>
-<li>Calibration of regression predictions or class probability estimates</li>
+<li>Calibration of regression predictions or class probability estimates (<a href="https://aml4td.org/chapters/cls-metrics.html#sec-cls-calibration">AML4TD</a>).</li>
 <li>Optimizing the threshold for calling a prediction “an event”</li>
 <li>Tools for abstaining from predicting when the results are very uncertain.</li>
 </ul>
@@ -551,7 +551,7 @@ Max Kuhn
 </section>
 <section id="adjust-class-probability-threshold" class="slide level2">
 <h2>Adjust Class Probability Threshold</h2>
-<p>Since we want to increase sensitivity, we need to decrease the probability of calling a prediction as “an event.” That means thresholds less than 1/2.</p>
+<p>Since we want to increase sensitivity, we need to decrease the threshold for calling a prediction “an event.” That means thresholds less than 1/2.</p>
 <p><br></p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href=""></a>mlp_thr_res <span class="ot">&lt;-</span></span>
@@ -681,6 +681,8 @@ Max Kuhn
 <p>There is a control vocabulary of scoring methods.</p>
 <p><br></p>
 <p>Currently: <code>aov_fstat</code>, <code>aov_pval</code>, <code>cor_pearson</code>, <code>cor_spearman</code>, <code>gain_ratio</code>, <code>imp_rf</code>, <code>imp_rf_conditional</code>, <code>imp_rf_oblique</code>, <code>info_gain</code>, <code>roc_auc</code>, <code>xtab_pval_chisq</code>, and <code>xtab_pval_fisher</code>.</p>
+<p><br></p>
+<p><span class="pkg"><a href="https://cran.r-project.org/package=filtro">filtro</a></span> is designed to allow you to assess multiple scores simultaneously, even if they cannot all be computed for each predictor.</p>
 </section>
 <section id="recipe-steps" class="slide level2">
 <h2>Recipe Steps</h2>
@@ -696,7 +698,7 @@ Max Kuhn
 <span id="cb24-8"><a href=""></a>  <span class="fu">step_rank_desirability_prop</span>(</span>
 <span id="cb24-9"><a href=""></a>    <span class="fu">maximize</span>(imp_rf_oblique, <span class="at">low =</span> <span class="dv">2</span>, <span class="at">high =</span> <span class="dv">100</span>),</span>
 <span id="cb24-10"><a href=""></a>    <span class="fu">constrain</span>(cor_pearson, <span class="at">low =</span> <span class="fl">0.5</span>, <span class="at">high =</span> <span class="fl">1.0</span>),</span>
-<span id="cb24-11"><a href=""></a>    <span class="at">prop_terms =</span> <span class="dv">1</span> <span class="sc">/</span> <span class="dv">10</span></span>
+<span id="cb24-11"><a href=""></a>    <span class="at">prop_terms =</span> <span class="fu">tune</span>()</span>
 <span id="cb24-12"><a href=""></a>  )</span>
 <span id="cb24-13"><a href=""></a></span>
 <span id="cb24-14"><a href=""></a><span class="fu">recipes</span>(outcome <span class="sc">~</span> ., <span class="at">data =</span> data) <span class="sc">|&gt;</span></span>
@@ -737,7 +739,7 @@ Max Kuhn
 </div>
 </section>
 <section id="prediction-format" class="slide level2">
-<h2>Prediction Format:</h2>
+<h2>Prediction Format</h2>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href=""></a>preds <span class="ot">&lt;-</span> <span class="fu">predict</span>(qr_fit, mtcars[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="sc">-</span><span class="dv">1</span>])</span>
 <span id="cb26-2"><a href=""></a>preds</span>

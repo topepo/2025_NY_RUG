@@ -448,7 +448,7 @@ more_sens |> select(starts_with(".d_"))
 
 Postprocessing means the adjustment of predictions create by a model, such as: 
 
- - Calibration of regression predictions or class probability estimates
+ - Calibration of regression predictions or class probability estimates ([AML4TD](https://aml4td.org/chapters/cls-metrics.html#sec-cls-calibration)).
  - Optimizing the threshold for calling a prediction "an event"
  - Tools for abstaining from predicting when the results are very uncertain. 
 
@@ -498,7 +498,7 @@ To handle the class imbalance, we'll try to balance sensitivity/specificity with
 
 ## Adjust Class Probability Threshold
 
-Since we want to increase sensitivity, we need to decrease the probability of calling a prediction as "an event." That means thresholds less than 1/2.
+Since we want to increase sensitivity, we need to decrease the threshold for calling a prediction "an event." That means thresholds less than 1/2.
 
 <br>
 
@@ -653,6 +653,9 @@ There is a control vocabulary of scoring methods.
 
 Currently: `r scores`. 
 
+<br>
+
+`r pkg(filtro)` is designed to allow you to assess multiple scores simultaneously, even if they cannot all be computed for each predictor. 
 
 ## Recipe Steps
 
@@ -671,7 +674,7 @@ recipes(outcome ~ ., data = data) |>
   step_rank_desirability_prop(
     maximize(imp_rf_oblique, low = 2, high = 100),
     constrain(cor_pearson, low = 0.5, high = 1.0),
-    prop_terms = 1 / 10
+    prop_terms = tune()
   )
 
 recipes(outcome ~ ., data = data) |>
@@ -713,7 +716,7 @@ qr_fit <-
   fit(mpg ~ disp + wt, data = mtcars)
 ```
 
-##  Prediction Format:
+##  Prediction Format 
 
 ```{r}
 #| label: mtcars-pred2
