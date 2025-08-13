@@ -7,6 +7,8 @@ title-slide-attributes:
   data-background-opacity: "0.15"
 ---
 
+# On github: `topepo/2025_NY_RUG`  {background-color="#B25D91FF"}
+
 
 ```{r}
 #| label: format-pkgs
@@ -731,7 +733,7 @@ as_tibble(preds$.pred_quantile)
 
 ## It's Happening!
 
-Emil Hvitfeldt has worked very hard to make sure that we can consume/use a sparse data structure for tidymodels. 
+Emil Hvitfeldt has worked very hard to make sure that we can consume/use sparse data structures in tidymodels. 
 
 - We use R's arcane ALTREP tools to enable sparse vectors and, by extension, data frames that are effectively sparse. 
 
